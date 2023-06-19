@@ -51,3 +51,47 @@ def parse_json(data):
 ######################################################################
 # INSERT CODE HERE
 ######################################################################
+
+@app.route("/health")
+def health():
+    return {"status":"OK"}, 200
+
+
+@app.route("/count")
+def count():
+    count = db.songs.count_documents({})
+    return {"count": f"{count3}"}, 200
+
+# @app.route("/song", methods=['GET'])
+# def songs():
+#     songs = db.songs.find({})
+#     songs_list = []
+#     for song in songs:
+#         song['_id'] = str(song['_id'])
+#         songs_list.append(song)
+#     response = {"songs": songs_list}
+#     return (response), 200
+
+@app.route("/song", methods=['GET'])
+def songs():
+    songs = list(db.songs.find({}))
+    return {"songs": parse_json(songs)}, 200
+
+@app.route("/song/<int:id>")
+def get_song_by_id(id):
+
+    docs = db.songs.find_one({"id": id})
+    if not docs:
+        return {"message": f"song with {id} not found"}
+    return parse_json(docs), 200
+
+
+@app.route("/song", methods=['POST'])
+def create_song():
+    post_data = request.json
+    song = db.songs.find_one({"id": post_data["id"]})
+    if song:
+        return {"Message": f"song with id {song['id']} already present"}, 302
+    insert_one: InsertOneResult = db.songs.insert_one(post_data)
+    #return {"inserted id":parse_json(post_data)}
+    return {"inserted id": parse_json(insert_one.inserted_id)}, 201
