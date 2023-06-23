@@ -10,6 +10,7 @@ from pymongo.results import InsertOneResult
 from bson.objectid import ObjectId
 import sys
 
+
 SITE_ROOT = os.path.realpath(os.path.dirname(__file__))
 json_url = os.path.join(SITE_ROOT, "data", "songs.json")
 songs_list: list = json.load(open(json_url))
@@ -60,7 +61,7 @@ def health():
 @app.route("/count")
 def count():
     count = db.songs.count_documents({})
-    return {"count": f"{count3}"}, 200
+    return {"count": f"{count}"}, 200
 
 # @app.route("/song", methods=['GET'])
 # def songs():
@@ -92,6 +93,22 @@ def create_song():
     song = db.songs.find_one({"id": post_data["id"]})
     if song:
         return {"Message": f"song with id {song['id']} already present"}, 302
-    insert_one: InsertOneResult = db.songs.insert_one(post_data)
+    Result = db.songs.insert_one(post_data)
     #return {"inserted id":parse_json(post_data)}
     return {"inserted id": parse_json(insert_one.inserted_id)}, 201
+
+@app.route("/song/<int:id>", methods=['PUT'])
+def update_songs(id):
+    updated_song = request.json
+    song = db.songs.find_one({"id":id})
+    if not song:
+        return {"message": "song not found"}, 404
+    
+    Result = db.songs.update_one({"id": id}, {"$set": updated_song})
+    return {"_id": parse_json(updated_song)}, 200
+
+@app.route("/song/<int:id>", methods=['DELETE'])
+def delete_song(id):
+    id = request.json.get('id')
+    print("TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT")
+    print(id)
