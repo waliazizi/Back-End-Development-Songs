@@ -57,7 +57,6 @@ def parse_json(data):
 def health():
     return {"status":"OK"}, 200
 
-
 @app.route("/count")
 def count():
     count = db.songs.count_documents({})
@@ -80,12 +79,10 @@ def songs():
 
 @app.route("/song/<int:id>")
 def get_song_by_id(id):
-
     docs = db.songs.find_one({"id": id})
     if not docs:
         return {"message": f"song with {id} not found"}
     return parse_json(docs), 200
-
 
 @app.route("/song", methods=['POST'])
 def create_song():
@@ -103,7 +100,6 @@ def update_songs(id):
     song = db.songs.find_one({"id":id})
     if not song:
         return {"message": "song not found"}, 404
-    
     Result = db.songs.update_one({"id": id}, {"$set": updated_song})
     return {"_id": parse_json(updated_song)}, 200
 
