@@ -107,8 +107,12 @@ def update_songs(id):
     Result = db.songs.update_one({"id": id}, {"$set": updated_song})
     return {"_id": parse_json(updated_song)}, 200
 
-@app.route("/song/<int:id>", methods=['DELETE'])
-def delete_song(id):
-    id = request.json.get('id')
-    print("TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT")
-    print(id)
+@app.route("/song", methods=['POST'])
+def create_song():
+    post_data = request.json
+    song = db.songs.find_one({"id": post_data["id"]})
+    if song:
+        return {"Message": f"song with id {song['id']} already present"}, 302
+    insert_one: InsertOneResult = db.songs.insert_one(post_data)
+    #return {"inserted id":parse_json(post_data)}
+    return {"inserted id": parse_json(insert_one.inserted_id)}, 201
